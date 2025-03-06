@@ -25,6 +25,9 @@ function HashMap() {
 
         // Finds index of a key that matches the current key being set. If no element/key matches, returns -1.
         const index = bucket.findIndex(([k]) => k === key);
+        if (index < 0 || index >= buckets.length) {
+            throw new Error("Trying to access index out of bounds");
+        }
         if (index !== -1) {
             bucket[index][1] = value; // Update existing key
         } else {
@@ -33,10 +36,11 @@ function HashMap() {
         }
 
         // Add resize if needed
-
+        if (size / capacity > loadFactor)
+            resize();
     }
 
-    // Returns the value that is assigned to key.
+    // Returns the value that is assigned to key, else returns null.
     function get(key) {
         const hashCode = hash(key);
         const bucket = buckets[hashCode];
@@ -44,7 +48,67 @@ function HashMap() {
         return value ? value[1] : null;
     }
 
+    // Returns true or false based on whether or not the key is in the hash map.
+    function has(key) {
+        return get(key) !== null;
+    }
 
+    // If given key is in hash map, it should remove the entry with that key and return true. If key is not in hashmap, return false.
+    function remove(key) {
+        const hashCode = hash(key);
+        const bucket = buckets[hashCode];
+        const index = bucket.findIndex(([k]) => k === key);
+        if (index < 0 || index >= buckets.length) {
+            throw new Error("Trying to access index out of bounds");
+        }
+        if (index !== -1) {
+            bucket.splice(index, 1);
+            size--;
+            return true;
+        } else
+            return false;
+    }
+
+    // Returns the number of stored keys in the hash map.
+    function length() {
+        return size;
+    }
+
+    // Removes all entries in the hash map.
+    function clear() {
+        buckets = [];
+        buckets = [16];
+        size = 0;
+    }
+
+    // Returns an array containing all the keys inside the hash map.
+    function keys() {
+
+    }
+
+    // Returns an array containing all the values.
+    function values() {
+
+    }
+
+    // Returns an array that contains each key, value pair. e.g. [[key, value], [key, value]]
+    function entries() {
+
+    }
+
+    // Doubles capacity and rehashes all key-value pair into new hashmap.
+    function resize() {
+        const oldBuckets = buckets;
+        capacity = capacity * 2;
+        buckets = [capacity];
+        size = 0;
+
+        for (const bucket of oldBuckets) {
+            for (const [key, value] of bucket) {
+                set(key, value);
+            }
+        }
+    }
 
     return {};
 }
